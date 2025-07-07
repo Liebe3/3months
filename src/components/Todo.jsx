@@ -1,4 +1,4 @@
-import React, { use, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 const Todo = () => {
@@ -6,7 +6,7 @@ const Todo = () => {
   const [listItem, setListItem] = useState([]);
   const [error, setError] = useState("");
 
-  const [isEditing, setIsEditing] = useState("");
+  const [isEditing, setIsEditing] = useState(null); // stores the ID of the todo being edited
   const [newItem, setNewItem] = useState("");
 
   const inputRef = useRef();
@@ -30,7 +30,7 @@ const Todo = () => {
   }, [listItem]);
 
   const handleAddItem = () => {
-    if (item) {
+    if (item.trim() !== "") {
       setListItem([...listItem, { id: uuidv4(), name: item }]);
       setItem("");
       setError("");
@@ -41,15 +41,22 @@ const Todo = () => {
   };
 
   const handleDeleteItem = (itemId) => {
-    const filteredItem = listItem.filter(
-      (listElement) => listElement.id !== itemId
-    );
-    setListItem(filteredItem);
+    setListItem(listItem.filter((todo) => todo.id !== itemId));
   };
 
   const handleEditItem = (editId, currentName) => {
     setNewItem(currentName);
     setIsEditing(editId);
+  };
+
+  const handleSaveEdit = () => {
+    setListItem(
+      listItem.map((todo) =>
+        todo.id === isEditing ? { ...todo, name: newItem } : todo
+      )
+    );
+    setIsEditing(null);
+    setNewItem("");
   };
 
   const handleClearLists = () => {
@@ -68,10 +75,11 @@ const Todo = () => {
         if (event.target === event.currentTarget) {
           inputRef.current.focus();
         }
-      }} // to make sure to focus to input if the user click on white space
-      className="flex flex-col max-w-lg bg-green-400 min-h-screen  pt-10 items-center m-auto"
+      }}
+      className="flex flex-col max-w-lg bg-green-400 min-h-screen pt-10 items-center m-auto"
     >
       <h1 className="text-2xl font-bold mb-20">MY TODO LIST</h1>
+
       <div className="flex justify-evenly max-w-md w-full bg-sky-400 p-4 relative">
         <input
           className="max-w-[300px] w-full"
@@ -79,7 +87,7 @@ const Todo = () => {
           value={item}
           placeholder="Enter item"
           onKeyDown={handleEnterKey}
-          onChange={(event) => setItem(event.target.value)}
+          onChange={(e) => setItem(e.target.value)}
           ref={inputRef}
         />
         <button
@@ -89,54 +97,60 @@ const Todo = () => {
           Add
         </button>
         <div className="absolute -bottom-1 left-10">
-          {error ? <p className="text-red-500">{error}</p> : null}
+          {error && <p className="text-red-500">{error}</p>}
         </div>
       </div>
+
       <ul className="flex flex-col max-w-md w-full border border-black py-2 px-6">
-        {listItem.map((myitem, index) => {
-          return (
-            <li
-              key={myitem.id}
-              ref={index === listItem.length - 1 ? lastItemRef : null}
-              className="flex justify-between items-center m-1"
+        {listItem.map((todo, index) => (
+          <li
+            key={todo.id}
+            ref={index === listItem.length - 1 ? lastItemRef : null}
+            className="flex justify-between items-center m-1"
+          >
+            {isEditing === todo.id ? (
+              <input
+                type="text"
+                value={newItem}
+                onChange={(e) => setNewItem(e.target.value)}
+                ref={editRef}
+              />
+            ) : (
+              <span>{todo.name}</span>
+            )}
+
+            <button
+              onClick={() => {
+                if (isEditing === todo.id) {
+                  handleSaveEdit(); // Save when editing
+                } else {
+                  handleEditItem(todo.id, todo.name); // Edit when not editing
+                }
+              }}
+              className={`p-1 cursor-pointer ${
+                isEditing === todo.id ? "bg-yellow-600" : "bg-green-600"
+              }`}
             >
-              {isEditing === myitem.id ? (
-                <input
-                  type="text"
-                  value={newItem}
-                  onChange={(event) => setNewItem(event.target.value)}
-                  ref={editRef}
-                />
-              ) : (
-                <span>{myitem.name}</span>
-              )}
+              {isEditing === todo.id ? "Save" : "Edit"}
+            </button>
 
-              <div className=" border border-blue-600 space-x-2">
-                <button
-                  onClick={() => handleEditItem(myitem.id, myitem.name)}
-                  className="bg-green-600 p-1 cursor-pointer"
-                >
-                  Edit
-                </button>
+            <button
+              onClick={() => handleDeleteItem(todo.id)}
+              className="bg-red-600 p-1 cursor-pointer"
+            >
+              Delete
+            </button>
+          </li>
+        ))}
 
-                <button
-                  onClick={() => handleDeleteItem(myitem.id)}
-                  className="bg-red-600 p-1 cursor-pointer"
-                >
-                  Delete
-                </button>
-              </div>
-            </li>
-          );
-        })}
-        {listItem.length > 0 ? (
+        {listItem.length > 0 && (
           <button
             onClick={handleClearLists}
-            className="text-red-500 border border-red-500 w-[150px] m-auto"
+            className="text-red-500 border border-red-500 w-[150px] m-auto mt-4"
           >
             Clear lists
           </button>
-        ) : null}
+        )}
       </ul>
     </div>
   );
