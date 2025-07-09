@@ -1,15 +1,11 @@
 import "./App.css";
-import UserName from "./components/UserName.jsx";
-import List from "./components/List.jsx";
-import Todo from "./components/Todo.jsx";
+import Todolist from "./components/Todolist";
 
 function App() {
   return (
-    <>
-      {/* <UserName /> */}
-      {/* <List /> */}
-      <Todo/>
-    </>
+    <div className="flex flex-col min-h-screen items-center bg-[#447D9B] border border-green">
+      <Todolist />
+    </div>
   );
 }
 
