@@ -10,7 +10,10 @@ const ConfirmationModalButton = ({ handleClearLists, onClose }) => {
         Cancel
       </button>
       <button
-        onClick={handleClearLists}
+        onClick={() => {
+          handleClearLists();
+          onClose();
+        }}
         className="bg-green-400 p-2 px-3 text-sm cursor-pointer rounded"
       >
         Okay

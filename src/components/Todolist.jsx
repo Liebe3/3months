@@ -11,6 +11,7 @@ const Todolist = () => {
   const [confirm, setConfirm] = useState(false);
 
   const inputRef = useRef();
+  const editRef = useRef();
 
   // To focus on input
   useEffect(() => {
@@ -32,12 +33,22 @@ const Todolist = () => {
     setListItem(filteredItem);
   };
 
+  const handleEditItem = (id, currentItem) => {
+    const filteredEditdItem = listItem.map((mylistitem) => {
+      if (mylistitem.id === id) {
+        return { ...mylistitem, name: currentItem };
+      }
+      return mylistitem;
+    });
+    setListItem(filteredEditdItem);
+  };
+
   const handleClearLists = () => {
     setListItem([]);
   };
   return (
     <div className="flex flex-col items-center justify-center w-full max-w-[650px] bg-[#273F4F] mt-20 rounded">
-      <h1 className="font-bold text-4xl p-10 text-[#FE7743]">
+      <h1 className="font-bold text-4xl p-10 text-[#FE7743] text-center">
         Veronica todo list
       </h1>
       <div className="flex items-center p-5 w-full max-w-[600px] space-x-5 relative">
@@ -70,6 +81,8 @@ const Todolist = () => {
               key={myitem.id}
               myitem={myitem}
               handleDeleteItem={handleDeleteItem}
+              editRef={editRef}
+              handleEditItem={handleEditItem}
             />
           );
         })}
